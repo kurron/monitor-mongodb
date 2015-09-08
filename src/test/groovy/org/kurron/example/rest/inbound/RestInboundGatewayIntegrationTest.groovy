@@ -47,7 +47,8 @@ class RestInboundGatewayIntegrationTest extends Specification implements Generat
     @Value( '${local.server.port}' )
     int port
 
-    def expectations = ['command': 'fast']
+    def possibleCommands = ['fast', 'normal', 'slow', 'dead']
+    def expectations = ['command': randomElement( possibleCommands )]
 
     def 'exercise happy path'() {
 

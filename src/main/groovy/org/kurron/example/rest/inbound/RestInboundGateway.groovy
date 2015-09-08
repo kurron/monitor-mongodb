@@ -18,7 +18,6 @@ package org.kurron.example.rest.inbound
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import static org.springframework.web.bind.annotation.RequestMethod.POST
 import groovy.json.JsonSlurper
-import groovy.transform.CompileDynamic
 import org.kurron.example.rest.ApplicationProperties
 import org.kurron.feedback.AbstractFeedbackAware
 import org.kurron.stereotype.InboundRestGateway
@@ -62,12 +61,19 @@ class RestInboundGateway extends AbstractFeedbackAware {
         theTemplate = aTemplate
     }
 
-    @CompileDynamic
     @RequestMapping( method = POST, consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE] )
     ResponseEntity<Void> post( @RequestBody final String request ) {
         counterService.increment( 'gateway.post' )
         def parsed = new JsonSlurper().parseText( request ) as Map
         def command = parsed['command'] as String
+        switch( command ) {
+            case 'normal': // introduce small latency
+                           break
+            case 'slow': // introduce large latency
+                          break
+            default: // go as fast as possible
+            break
+        }
         new ResponseEntity<Void>( HttpStatus.NO_CONTENT )
     }
 
