@@ -78,7 +78,7 @@ class RestInboundGateway extends AbstractFeedbackAware {
                 delay = 0
         }
         Thread.sleep( delay )
-        def document = repository.save( new SomeData( data: Calendar.instance.time ) )
+        repository.save( new SomeData( command: command ) )
         new ResponseEntity<Void>( HttpStatus.NO_CONTENT )
     }
 }

@@ -33,6 +33,6 @@ class SomeData {
     @Field( '_id' )
     ObjectId id
 
-    @Field( 'data' )
-    String data
+    @Field( 'command' )
+    String command
 }
