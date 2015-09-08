@@ -47,8 +47,7 @@ class RestInboundGatewayIntegrationTest extends Specification implements Generat
     @Value( '${local.server.port}' )
     int port
 
-    def possibleCommands = ['fast', 'normal', 'slow', 'dead']
-    def expectations = possibleCommands.collect { ['command': randomElement(possibleCommands)] }
+    def expectations = ['command': 'fast']
 
     def 'exercise happy path'() {
 
@@ -65,12 +64,12 @@ class RestInboundGatewayIntegrationTest extends Specification implements Generat
         headers.setContentType( MediaType.APPLICATION_JSON )
         headers.set( 'X-Correlation-Id', randomHexString() )
         HttpEntity<String> request = new HttpEntity<>( command, headers )
-        Future<ResponseEntity<String>> future = theTemplate.postForEntity( uri, request, String )
+        Future<ResponseEntity<Void>> future = theTemplate.postForEntity( uri, request, Void )
 
         when: 'the answer comes back'
         def response = future.get()
 
-        then: 'the endpoint returns with 200'
-        response.statusCode == HttpStatus.OK
+        then: 'the endpoint returns with 204'
+        response.statusCode == HttpStatus.NO_CONTENT
     }
 }

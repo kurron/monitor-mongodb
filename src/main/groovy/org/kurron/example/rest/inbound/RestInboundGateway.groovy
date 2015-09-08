@@ -15,10 +15,8 @@
  */
 package org.kurron.example.rest.inbound
 
-import static groovyx.gpars.GParsPool.withPool
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import static org.springframework.web.bind.annotation.RequestMethod.POST
-import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import groovy.transform.CompileDynamic
 import org.kurron.example.rest.ApplicationProperties
@@ -66,19 +64,11 @@ class RestInboundGateway extends AbstractFeedbackAware {
 
     @CompileDynamic
     @RequestMapping( method = POST, consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE] )
-    ResponseEntity<String> post( @RequestBody final String request ) {
+    ResponseEntity<Void> post( @RequestBody final String request ) {
         counterService.increment( 'gateway.post' )
-        def parsed = new JsonSlurper().parseText( request ) as List
-        withPool( parsed.size() ) {
-            def results = parsed.makeConcurrent().collect { Map command ->
-                def service = command.entrySet().first().key as String
-                def action = command.entrySet().first().value as String
-                ResponseEntity<String> response = theTemplate.getForEntity( toEndPoint( service ), String )
-                [service: service, command: action, status: response.statusCode, result: 'response.body']
-            }
-            def builder = new JsonBuilder( results )
-            new ResponseEntity<String>( builder.toPrettyString(), HttpStatus.OK )
-        } as ResponseEntity<String>
+        def parsed = new JsonSlurper().parseText( request ) as Map
+        def command = parsed['command'] as String
+        new ResponseEntity<Void>( HttpStatus.NO_CONTENT )
     }
 
     private static URI toEndPoint( String service ) {
