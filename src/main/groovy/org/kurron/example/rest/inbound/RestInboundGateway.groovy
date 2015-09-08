@@ -15,6 +15,7 @@
  */
 package org.kurron.example.rest.inbound
 
+import static java.nio.charset.StandardCharsets.UTF_8
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import static org.springframework.web.bind.annotation.RequestMethod.POST
 import groovy.json.JsonSlurper
@@ -23,6 +24,12 @@ import org.kurron.example.rest.outbound.SomeData
 import org.kurron.example.rest.outbound.SomeDataRepository
 import org.kurron.feedback.AbstractFeedbackAware
 import org.kurron.stereotype.InboundRestGateway
+import org.springframework.amqp.core.Message
+import org.springframework.amqp.core.MessageBuilder
+import org.springframework.amqp.core.MessageDeliveryMode
+import org.springframework.amqp.core.MessageProperties
+import org.springframework.amqp.core.MessagePropertiesBuilder
+import org.springframework.amqp.rabbit.core.RabbitOperations
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.actuate.metrics.CounterService
 import org.springframework.http.HttpStatus
@@ -52,13 +59,20 @@ class RestInboundGateway extends AbstractFeedbackAware {
      **/
     private final SomeDataRepository repository
 
+    /**
+     * Handles RabbitMQ interactions.
+     **/
+    private final RabbitOperations template
+
     @Autowired
     RestInboundGateway( final ApplicationProperties aConfiguration,
                         final CounterService aCounterService,
-                        final SomeDataRepository aRepository ) {
+                        final SomeDataRepository aRepository,
+                        final RabbitOperations aTemplate ) {
         configuration = aConfiguration
         counterService = aCounterService
         repository = aRepository
+        template = aTemplate
     }
 
     @RequestMapping( method = POST, consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE] )
@@ -66,7 +80,7 @@ class RestInboundGateway extends AbstractFeedbackAware {
         counterService.increment( 'gateway.post' )
         def parsed = new JsonSlurper().parseText( request ) as Map
         def command = parsed['command'] as String
-        long delay = 0
+        long delay
         switch( command ) {
             case 'normal': // introduce small latency
                 delay = 1000 * 2
@@ -78,7 +92,25 @@ class RestInboundGateway extends AbstractFeedbackAware {
                 delay = 0
         }
         Thread.sleep( delay )
-        repository.save( new SomeData( command: command ) )
+        def document = repository.save( new SomeData( command: command ) )
+        def message = newMessage( document )
+        template.send( message )
         new ResponseEntity<Void>( HttpStatus.NO_CONTENT )
+    }
+
+    private static MessageProperties newProperties() {
+        MessagePropertiesBuilder.newInstance().setAppId( 'monitor-mongodb' )
+                                              .setContentType( 'application/json' )
+                                              .setMessageId( UUID.randomUUID().toString() )
+                                              .setDeliveryMode( MessageDeliveryMode.NON_PERSISTENT )
+                                              .setTimestamp( Calendar.instance.time )
+                                              .build()
+    }
+
+    private static Message newMessage( SomeData event ) {
+        def properties = newProperties()
+        MessageBuilder.withBody( event.command.getBytes( UTF_8  ) )
+                      .andProperties( properties )
+                      .build()
     }
 }
