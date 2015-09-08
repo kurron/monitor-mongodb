@@ -17,7 +17,6 @@
 package org.kurron.example.rest.inbound
 
 import groovy.json.JsonBuilder
-import groovy.json.JsonSlurper
 import java.util.concurrent.Future
 import org.kurron.example.rest.Application
 import org.kurron.traits.GenerationAbility
@@ -49,8 +48,7 @@ class RestInboundGatewayIntegrationTest extends Specification implements Generat
     int port
 
     def possibleCommands = ['fast', 'normal', 'slow', 'dead']
-    def services = ['gateway', 'mongodb', 'redis', 'mysql', 'postgresql', 'rabbitmq']
-    def expectations = services.collect { [(it): randomElement(possibleCommands)] }
+    def expectations = possibleCommands.collect { ['command': randomElement(possibleCommands)] }
 
     def 'exercise happy path'() {
 
@@ -74,10 +72,5 @@ class RestInboundGatewayIntegrationTest extends Specification implements Generat
 
         then: 'the endpoint returns with 200'
         response.statusCode == HttpStatus.OK
-
-        and: 'the expected fields are present'
-        def json = new JsonSlurper().parseText( response.body ) as List
-        def alive = json.collect { Map it -> it['service'] }
-        services.every { it in alive } // silly but for now just make sure that each service responded
     }
 }
