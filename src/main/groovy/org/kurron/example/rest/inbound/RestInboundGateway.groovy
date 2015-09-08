@@ -19,6 +19,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import static org.springframework.web.bind.annotation.RequestMethod.POST
 import groovy.json.JsonSlurper
 import org.kurron.example.rest.ApplicationProperties
+import org.kurron.example.rest.outbound.SomeData
+import org.kurron.example.rest.outbound.SomeDataRepository
 import org.kurron.feedback.AbstractFeedbackAware
 import org.kurron.stereotype.InboundRestGateway
 import org.springframework.beans.factory.annotation.Autowired
@@ -45,11 +47,18 @@ class RestInboundGateway extends AbstractFeedbackAware {
      */
     private final CounterService counterService
 
+    /**
+     * Manages interactions with the database.
+     **/
+    private final SomeDataRepository repository
+
     @Autowired
     RestInboundGateway( final ApplicationProperties aConfiguration,
-                        final CounterService aCounterService ) {
+                        final CounterService aCounterService,
+                        final SomeDataRepository aRepository ) {
         configuration = aConfiguration
         counterService = aCounterService
+        repository = aRepository
     }
 
     @RequestMapping( method = POST, consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE] )
@@ -69,6 +78,7 @@ class RestInboundGateway extends AbstractFeedbackAware {
                 delay = 0
         }
         Thread.sleep( delay )
+        def document = repository.save( new SomeData( data: Calendar.instance.time ) )
         new ResponseEntity<Void>( HttpStatus.NO_CONTENT )
     }
 }
