@@ -27,7 +27,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.client.RestOperations
 
 /**
  * Handles inbound REST requests.
@@ -46,18 +45,11 @@ class RestInboundGateway extends AbstractFeedbackAware {
      */
     private final CounterService counterService
 
-    /**
-     * Manages REST interactions.
-     **/
-    private final RestOperations theTemplate
-
     @Autowired
     RestInboundGateway( final ApplicationProperties aConfiguration,
-                        final CounterService aCounterService,
-                        final RestOperations aTemplate ) {
+                        final CounterService aCounterService ) {
         configuration = aConfiguration
         counterService = aCounterService
-        theTemplate = aTemplate
     }
 
     @RequestMapping( method = POST, consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE] )
