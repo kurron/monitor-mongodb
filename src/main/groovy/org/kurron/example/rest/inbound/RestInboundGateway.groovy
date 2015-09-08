@@ -28,7 +28,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.client.RestOperations
-import org.springframework.web.util.UriComponentsBuilder
 
 /**
  * Handles inbound REST requests.
@@ -66,18 +65,18 @@ class RestInboundGateway extends AbstractFeedbackAware {
         counterService.increment( 'gateway.post' )
         def parsed = new JsonSlurper().parseText( request ) as Map
         def command = parsed['command'] as String
+        long delay = 0
         switch( command ) {
             case 'normal': // introduce small latency
-                           break
+                delay = 1000 * 2
+                break
             case 'slow': // introduce large latency
-                          break
+                delay = 1000 * 10
+                break
             default: // go as fast as possible
-            break
+                delay = 0
         }
+        Thread.sleep( delay )
         new ResponseEntity<Void>( HttpStatus.NO_CONTENT )
-    }
-
-    private static URI toEndPoint( String service ) {
-        UriComponentsBuilder.newInstance().scheme( 'http' ).host( 'google.com' ).path( '/' ).build().toUri()
     }
 }
