@@ -36,7 +36,8 @@ enum ExampleFeedbackContext implements FeedbackContext {
     PRECONDITION_FAILED( 2004, 'The required {} header was not found on an inbound REST request', ERROR, QA ),
     CONTENT_LENGTH_REQUIRED( 2005, 'The Content-Length was not set and is required', ERROR, QA ),
     PAYLOAD_TOO_LARGE( 2006, 'The payload size of {} Bytes exceeds the maximum permitted size of {} Megabytes', ERROR, QA ),
-    MISSING_CORRELATION_ID( 2007, 'A correlation id was missing from a request, and an auto-generated id of {} will be used instead', FeedbackLevel.WARN, QA )
+    MISSING_CORRELATION_ID( 2007, 'A correlation id was missing from a request, and an auto-generated id of {} will be used instead', FeedbackLevel.WARN, QA ),
+    DATA_STORED( 2008, 'Just stored {} in the database', INFO, QA )
 
     /**
      * Unique context code for this instance.

@@ -20,6 +20,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import static org.springframework.web.bind.annotation.RequestMethod.POST
 import groovy.json.JsonSlurper
 import org.kurron.example.rest.ApplicationProperties
+import org.kurron.example.rest.feedback.ExampleFeedbackContext
 import org.kurron.example.rest.outbound.SomeData
 import org.kurron.example.rest.outbound.SomeDataRepository
 import org.kurron.feedback.AbstractFeedbackAware
@@ -93,6 +94,7 @@ class RestInboundGateway extends AbstractFeedbackAware {
         }
         Thread.sleep( delay )
         def document = repository.save( new SomeData( command: command ) )
+        feedbackProvider.sendFeedback( ExampleFeedbackContext.DATA_STORED, document.id )
         def message = newMessage( document )
         template.send( message )
         new ResponseEntity<Void>( HttpStatus.NO_CONTENT )
