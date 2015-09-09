@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 apply plugin: 'spring-boot'
+apply plugin: 'io.spring.dependency-management'
+
+// Import Spring Boot's bom, spring-boot-dependencies
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+    }
+}
+
+// Override the spring-data-releasetrain.version property
+ext['spring-data-releasetrain.version'] = "${springDataTrainVersion}"
 
 configurations {
     providedRuntime
