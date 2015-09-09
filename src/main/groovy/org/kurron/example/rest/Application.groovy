@@ -17,6 +17,7 @@ package org.kurron.example.rest
 
 import groovy.util.logging.Slf4j
 import org.kurron.feedback.FeedbackAwareBeanPostProcessor
+import org.springframework.amqp.core.DirectExchange
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.beans.factory.annotation.Value
@@ -98,4 +99,8 @@ class Application {
         bean
     }
 
+    @Bean
+    DirectExchange exchange( ApplicationProperties configuration ) {
+        new DirectExchange( configuration.exchange )
+    }
 }
