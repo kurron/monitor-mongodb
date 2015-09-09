@@ -24,9 +24,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 class ApplicationProperties {
 
     /**
-     * The maximum payload size that the server will accept, in Megabytes.
+     * The exchange to publish to.
      */
-    long maxPayloadSize
+    String exchange
 
     /**
      * Flag controlling whether or not the correlation id is required.

@@ -68,7 +68,7 @@ logging:
     config: classpath:logback.xml
 
 example:
-    maxPayloadSize: 10
+    exchange: monitoring
     requireCorrelationId: true
 
 #---------e Profile specific overrides ----------#

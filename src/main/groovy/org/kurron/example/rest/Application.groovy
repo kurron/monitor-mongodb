@@ -17,6 +17,8 @@ package org.kurron.example.rest
 
 import groovy.util.logging.Slf4j
 import org.kurron.feedback.FeedbackAwareBeanPostProcessor
+import org.springframework.amqp.rabbit.connection.ConnectionFactory
+import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -88,4 +90,12 @@ class Application {
     RestTemplate restTemplate() {
         new RestTemplate()
     }
+
+    @Bean
+    RabbitTemplate rabbitTemplate( ApplicationProperties configuration, ConnectionFactory factory  ) {
+        def bean = new RabbitTemplate( factory )
+        bean.exchange = configuration.exchange
+        bean
+    }
+
 }
