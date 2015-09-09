@@ -20,4 +20,6 @@ dependencies {
         exclude module: 'groovy-all'
         exclude module: 'junit-dep'
     }
+    // we have to do this because sometimes the transitive inclusion gets overridden with a lower version
+    testCompile( "org.spockframework:spock-core:${spockVersion}" )
 }
