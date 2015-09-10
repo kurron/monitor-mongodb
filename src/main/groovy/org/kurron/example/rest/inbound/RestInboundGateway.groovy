@@ -95,23 +95,22 @@ class RestInboundGateway extends AbstractFeedbackAware {
         Thread.sleep( delay )
         def document = repository.save( new SomeData( command: command ) )
         feedbackProvider.sendFeedback( ExampleFeedbackContext.DATA_STORED, document.id )
-        def message = newMessage( document )
-        template.send( message )
+        template.send( newMessage( command ) )
         new ResponseEntity<Void>( HttpStatus.NO_CONTENT )
     }
 
     private static MessageProperties newProperties() {
         MessagePropertiesBuilder.newInstance().setAppId( 'monitor-mongodb' )
-                                              .setContentType( 'application/json' )
+                                              .setContentType( 'text/plain' )
                                               .setMessageId( UUID.randomUUID().toString() )
                                               .setDeliveryMode( MessageDeliveryMode.NON_PERSISTENT )
                                               .setTimestamp( Calendar.instance.time )
                                               .build()
     }
 
-    private static Message newMessage( SomeData event ) {
+    private static Message newMessage( String command ) {
         def properties = newProperties()
-        MessageBuilder.withBody( event.command.getBytes( UTF_8  ) )
+        MessageBuilder.withBody( command.getBytes( UTF_8  ) )
                       .andProperties( properties )
                       .build()
     }

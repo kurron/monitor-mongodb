@@ -36,6 +36,15 @@ spring:
         serialization:
             indent_output: true
 
+    rabbitmq:
+        host: rabbitmq
+        port: 5672
+#       addresses:
+        username: guest
+        password: guest
+        virtual-host: /
+        dynamic: true
+
 # specify the port the service should bind to when using the embedded container, a value of 0 will bind to a randomly selected available port
 server:
     port: 8100
