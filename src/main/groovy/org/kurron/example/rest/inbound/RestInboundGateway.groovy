@@ -78,7 +78,7 @@ class RestInboundGateway extends AbstractFeedbackAware {
     }
 
     @RequestMapping( method = POST, consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE] )
-    ResponseEntity<Void> post( @RequestBody final String request,@RequestHeader( 'X-Correlation-Id' ) Optional<String> correlationID ) {
+    ResponseEntity<Void> post( @RequestBody final String request, @RequestHeader( 'X-Correlation-Id' ) Optional<String> correlationID ) {
         counterService.increment( 'gateway.post' )
         def parsed = new JsonSlurper().parseText( request ) as Map
         def command = parsed['command'] as String
