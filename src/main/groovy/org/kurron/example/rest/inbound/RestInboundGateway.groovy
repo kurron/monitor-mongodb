@@ -36,6 +36,7 @@ import org.springframework.boot.actuate.metrics.CounterService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 
 /**
@@ -77,7 +78,7 @@ class RestInboundGateway extends AbstractFeedbackAware {
     }
 
     @RequestMapping( method = POST, consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE] )
-    ResponseEntity<Void> post( @RequestBody final String request ) {
+    ResponseEntity<Void> post( @RequestBody final String request,@RequestHeader( 'X-Correlation-Id' ) Optional<String> correlationID ) {
         counterService.increment( 'gateway.post' )
         def parsed = new JsonSlurper().parseText( request ) as Map
         def command = parsed['command'] as String
@@ -95,21 +96,22 @@ class RestInboundGateway extends AbstractFeedbackAware {
         Thread.sleep( delay )
         def document = repository.save( new SomeData( command: command ) )
         feedbackProvider.sendFeedback( ExampleFeedbackContext.DATA_STORED, document.id )
-        template.send( newMessage( command ) )
+        template.send( newMessage( command, correlationID.orElse( 'NOT PROVIDED' ) ) )
         new ResponseEntity<Void>( HttpStatus.NO_CONTENT )
     }
 
-    private static MessageProperties newProperties() {
+    private static MessageProperties newProperties( String correlationID ) {
         MessagePropertiesBuilder.newInstance().setAppId( 'monitor-mongodb' )
                                               .setContentType( 'text/plain' )
                                               .setMessageId( UUID.randomUUID().toString() )
                                               .setDeliveryMode( MessageDeliveryMode.NON_PERSISTENT )
                                               .setTimestamp( Calendar.instance.time )
+                                              .setCorrelationId( correlationID.getBytes( UTF_8  ) )
                                               .build()
     }
 
-    private static Message newMessage( String command ) {
-        def properties = newProperties()
+    private static Message newMessage( String command, String correlationID ) {
+        def properties = newProperties( correlationID )
         MessageBuilder.withBody( command.getBytes( UTF_8  ) )
                       .andProperties( properties )
                       .build()
